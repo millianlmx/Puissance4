@@ -1,20 +1,30 @@
 /**
- *	\file		ihm.h
- *	\brief		Spécification de la couche IHM
+ *	\file		logic.h
+ *	\brief		Spécification de la couche Logic
  *	\author		Millian Lamiaux & Malo Garnier
  *	\date		8 avril 2024
  *	\version	1.0
  */
 
-#ifndef IHM_H
-#define IHM_H
+#ifndef LOGIC_H
+#define LOGIC_H
 
 /*
 *****************************************************************************************
  *	\noop		I N C L U D E S   S P E C I F I Q U E S
  */
+#include <stdbool.h>
 #include <stdio.h>
-#include "data.h"
+#include <stdlib.h>
+#include "ihm.h"
+
+/*
+*****************************************************************************************
+ *	\noop		D E F I N I T I O N   DES   C O N S T A N T E S
+ */
+
+#define REDPLAYER 1
+#define YELLOWPLAYER 2
 
 /*
 *****************************************************************************************
@@ -33,21 +43,28 @@
 #define PAUSE(msg)	printf("%s [Appuyez sur entrée pour continuer]", msg); getchar();
 /*
 *****************************************************************************************
- *	\noop		S T R C T U R E S   DE   D O N N E E S
- */
-
-/*
-*****************************************************************************************
  *	\noop		P R O T O T Y P E S   DES   F O N C T I O N S
  */
 /**
- *	\fn			void afficherPlateau (int **matrix, int col, int ligne)
- *	\brief		Affiche la matrice du Puissance 4 au format humain dans le Shell
+ *	\fn			bool verifVictoire (int **matrix, int n, int m)
+ *	\brief		Vérifie s'il y a une victoire dans la partie en cours
  *	\param		matrix : matrice d'entier comportant des 0, 1 ou 2
  *	\param		col : le nombre de colonnes de la matrice
  *	\param		ligne : le nombre de lignes de la matrice
- *	\note		Ne pas donner une matrice trop grande sous peine de dégrader l'expérience utilisateur
+ *  \return     boolean : True si victoire et false sinon.
  */
-void afficherPlateau(int **matrix, int col, int ligne);
+bool verifVictoire(int **matrix, int ligne, int col);
 
-#endif /* IHM_H */
+/**
+ *	\fn			void afficherPlateau (int **matrix, int col, int ligne)
+ *	\brief		Joue un jeton dans la colonne column
+ *	\param		matrix : matrice d'entier comportant des 0, 1 ou 2
+ *	\param		col : le nombre de colonnes de la matrice
+ *	\param		ligne : le nombre de lignes de la matrice
+ *  \param      column : l'entier de la colonne souhaitée
+ *  \param      player : l'entier qui représente le joueur 1 ou 2.
+ *	\return		int : 0 si l'insertion s'est bien déroulée, -1 sinon.
+ */
+int jouerJeton(int **matrix, int ligne, int column, int player);
+
+#endif /* LOGIC_H */

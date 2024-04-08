@@ -1,7 +1,7 @@
 #include "ihm.h"
 #include "colors.h"
 
-void afficherPlateau(int **matrix, int col, int ligne)
+void afficherPlateau(int **matrix,  int ligne, int col)
 {
     char separator[] = "##########";
 
@@ -62,6 +62,7 @@ void afficherPlateau(int **matrix, int col, int ligne)
             printf("\n");
         }
     }
+
     for (int l = 0; l < col; l++)
         printf("%s", separator);
     printf("#\n");

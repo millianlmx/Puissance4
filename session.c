@@ -9,26 +9,6 @@
 
 #include "session.h"
 
-#define CHECK(sts, msg) \
-    if ((sts) == -1)    \
-    {                   \
-        perror(msg);    \
-        exit(-1);       \
-    }
-#define PAUSE(msg)                                         \
-    printf("%s [Appuyez sur entrée pour continuer]", msg); \
-    getchar();
-
-struct socket
-{
-    int fd;                     /**< numéro de la socket créée			*/
-    int mode;                   /**< mode connecté/non : STREAM/DGRAM	*/
-    struct sockaddr_in addrLoc; /**< adresse locale de la socket 		*/
-    struct sockaddr_in addrDst; /**< adresse distante de la socket 		*/
-};
-
-typedef struct socket socket_t;
-
 void adr2struct(struct sockaddr_in *addr, char *adrIP, short port)
 {
     // Initialisation de la structure d'adressage
@@ -78,14 +58,7 @@ socket_t accepterClt(const socket_t sockEcoute)
     sock.mode = sockEcoute.mode;
     return sock;
 }
-/**
- *	\fn			socket_t connecterClt2Srv (char *adrIP, short port)
- *	\brief		Crétaion d'une socket d'appel et connexion au seveur dont
- *				l'adressage est fourni en paramètre
- *	\param		adrIP : adresse IP du serveur à connecter
- *	\param		port : port TCP du serveur à connecter
- *	\result		socket connectée au serveur fourni en paramètre
- */
+
 socket_t connecterClt2Srv(char *adrIP, short port) {
     socket_t sock = creerSocket(SOCK_STREAM);
     adr2struct(&sock.addrDst, adrIP, port);

@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <string.h>
 /*
 *****************************************************************************************
  *	\noop		D E F I N I T I O N   DES   M A C R O S
