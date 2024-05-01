@@ -1,28 +1,31 @@
 #include "logic.h"
-#include "colors.h"
 
+#ifdef SERVEUR
 int main()
 {
-    int n = 6, m = 7;
-    int **matrix = (int **)malloc(n * sizeof(int *));
+    socket_t socket = creerSocketEcoute("192.168.1.15", 50000);
 
-    for (int i = 0; i < n; i++)
-    {
-        matrix[i] = (int *)malloc(m * sizeof(int));
-    }
+    socket_t client = accepterClt(socket);
 
-    for (int i = 0; i < n; i++)
-    {
-        for (int j = 0; j < m; j++)
-        {
-            matrix[i][j] = 0;
-        }
-    }
+    buffer_t buffer;
+    memset(buffer, 0, sizeof(buffer));
 
-    int player = REDPLAYER;
-    int column = 3;
-    jouerJeton(matrix, n, column, player);
-    afficherPlateau(matrix, n, m);
-    printf("Victory: %d\n", verifVictoire(matrix, n, m));
-    return 0;
+    recevoir(&client, buffer, NULL);
+
+    printf("Message reçu : %s\n", buffer);
+
 }
+#else
+int main()
+{
+    socket_t sockEch = connecterClt2Srv("192.168.1.15", 50000);
+
+    buffer_t buffer;
+    memset(buffer, 0, sizeof(buffer));
+
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strlen(buffer) - 1] = '\0';
+
+    envoyer(&sockEch, buffer, NULL);
+}
+#endif

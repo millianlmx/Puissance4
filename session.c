@@ -1,6 +1,6 @@
 /**
  *	\file		session.c
- *	\brief		Spécification de la couche Session
+ *	\brief		Implémentation de la couche Session
  *	\author		Millian Lamiaux
  *	\date		3 mars 2023
  *	\version	1.0
@@ -53,6 +53,10 @@ socket_t accepterClt(const socket_t sockEcoute)
     struct sockaddr_in addr;
     socket_t sock;
     socklen_t len = sizeof(addr);
+
+    memset(&addr, 0, sizeof(addr));
+    memset(&sock, 0, sizeof(sock));
+
     CHECK(sock.fd = accept(sockEcoute.fd, (struct sockaddr *) &addr, &len), "Erreur lors de l'acceptation du client !");
     sock.addrLoc = sockEcoute.addrLoc;
     sock.mode = sockEcoute.mode;

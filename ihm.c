@@ -1,7 +1,7 @@
 #include "ihm.h"
 #include "colors.h"
 
-void afficherPlateau(int **matrix,  int ligne, int col)
+void afficherPlateau(int **matrix, int ligne, int col)
 {
     char separator[] = "##########";
 
@@ -11,7 +11,8 @@ void afficherPlateau(int **matrix,  int ligne, int col)
         "██║   ██║",
         "██║   ██║",
         "╚██████╔╝",
-        "╚═════╝"};
+        "╚═════╝",
+    };
 
     char *emptyFigure[] = {
         "       ",

@@ -16,6 +16,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/ioctl.h>
+#include "colors.h"
 #include "ihm.h"
 
 /*
@@ -66,5 +68,19 @@ bool verifVictoire(int **matrix, int ligne, int col);
  *	\return		int : 0 si l'insertion s'est bien déroulée, -1 sinon.
  */
 int jouerJeton(int **matrix, int ligne, int column, int player);
+
+/**
+ *	\fn			int jouerPartie
+ *	\brief		Joue une partie entre deux joueur
+ */
+void jouerPartie();
+/**
+ * \fn         int **creerPlateau(int n, int m)
+ * \brief      Crée un plateau de jeu de taille n x m
+ * \param      n : nombre de lignes
+ * \param      m : nombre de colonnes
+ * \return     int** : un plateau de jeu de taille n x m
+*/
+plateau_t creerPlateau(int n, int m);
 
 #endif /* LOGIC_H */

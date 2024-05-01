@@ -10,7 +10,7 @@ bool verifVictoire(int **matrix, int lignes, int colonnes)
             {
                 if (matrix[i][j] == l)
                 {
-                    if (i + 3 < colonnes && matrix[i + 1][j] == l && matrix[i + 2][j] == l && matrix[i + 3][j] == l)
+                    if (i + 3 < lignes && matrix[i + 1][j] == l && matrix[i + 2][j] == l && matrix[i + 3][j] == l)
                     {
                         return true;
                     }
@@ -35,8 +35,7 @@ bool verifVictoire(int **matrix, int lignes, int colonnes)
 
 int jouerJeton(int **matrix, int lignes, int column, int player)
 {
-    int i;
-    for (i = lignes - 1; i >= 0; i--)
+    for (int i = lignes - 1; i >= 0; i--)
     {
         if (matrix[i][column] == 0)
         {
@@ -45,4 +44,83 @@ int jouerJeton(int **matrix, int lignes, int column, int player)
         }
     }
     return -1;
+}
+
+plateau_t creerPlateau(int n, int m) 
+{
+    int **matrix = (int **)malloc(n * sizeof(int *));
+
+    for (int i = 0; i < n; i++)
+    {
+        matrix[i] = (int *)malloc(m * sizeof(int));
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < m; j++)
+        {
+            matrix[i][j] = 0;
+        }
+    }
+
+    return matrix;
+}
+
+void jouerPartie()
+{
+
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+    int raw_lines = w.ws_row;
+    int raw_columns = w.ws_col;
+    int p4_lines, p4_columns;
+
+    if (raw_lines % 7 > 0 || raw_columns % 10 > 0)
+    {
+        p4_lines = raw_lines / 7;
+        p4_columns = raw_columns / 10;
+    }
+    else
+    {
+        p4_lines = raw_lines / 7 - 1;
+        p4_columns = raw_columns / 10 - 1;
+    }
+
+    int n, m;
+
+    printf("Entrez la taille du plateau (ligne colonne) max (%d %d): ", p4_lines, p4_columns);
+    scanf("%d %d", &n, &m);
+
+    if (n > p4_lines || m > p4_columns)
+    {
+        n = p4_lines;
+        m = p4_columns;
+    }
+
+    plateau_t plateau = creerPlateau(n, m);
+
+    int player = REDPLAYER;
+
+    while (verifVictoire(plateau, n, m) == false)
+    {
+        printf("\033[H\033[J");
+        afficherPlateau(plateau, n, m);
+        printf("Joueur %d, entrez la colonne ou vous voulez jouer: ", player);
+        int column;
+        scanf("%d", &column);
+        if (jouerJeton(plateau, n, column - 1, player) == -1)
+        {
+            printf("Colonne pleine, veuillez en choisir une autre\n");
+            continue;
+        }
+        else
+        {
+            player = player == REDPLAYER ? YELLOWPLAYER : REDPLAYER;
+        }
+    }
+
+    afficherPlateau(plateau, n, m);
+    printf("Joueur %d a gagne\n", player == REDPLAYER ? YELLOWPLAYER : REDPLAYER);
+
 }

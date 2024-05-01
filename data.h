@@ -11,6 +11,7 @@
 *****************************************************************************************
  *	\noop		I N C L U D E S   S P E C I F I Q U E S
  */
+#include <stdio.h>
 #include "session.h"
 /*
 *****************************************************************************************
@@ -30,6 +31,31 @@
  *	\brief		chaîne de caractères à émettre/recevoir
  */
 typedef char buffer_t[MAX_BUFFER];
+/**
+ *	\typedef	plateau_t
+ *	\brief		matrice de nombre entiers
+ */
+typedef int ** plateau_t;
+/**
+ *	\typedef	player_t
+ *	\brief		nombre entier représentant un joueur
+ */
+typedef struct
+{
+    char *ip;
+    char *port;
+    char *pseudo;
+} player_t;
+
+/**
+ *	\typedef	maillon_t
+ *	\brief		stockage des joueurs sous forme de liste chaînée
+ */
+typedef struct
+{
+    player_t player;
+    struct maillon_t *suivant;
+} maillon_t;
 /**
  *	\typedef	generic
  *	\brief		type de données générique : requêtes/réponses
@@ -54,7 +80,7 @@ typedef void (*pFct) (generic, generic);
  *	\note		Si le mode est DGRAM, l'appel nécessite en plus l'adresse IP et le port.
  *	\result		paramètre sockEch modifié pour le mode DGRAM
  */
-void envoyer(socket_t *sockEch, generic quoi, pFct serial, ...);
+void envoyer(socket_t *sockEch, generic quoi, pFct serial);
 /**
  *	\fn			void recevoir(socket_t *sockEch, generic quoi, pFct deSerial)
  *	\brief		Réception d'une requête/réponse sur une socket
@@ -63,8 +89,23 @@ void envoyer(socket_t *sockEch, generic quoi, pFct serial, ...);
  *	\param 		deSerial : pointeur sur la fonction de dé-serialisation d'une requête/réponse
  *	\note		si le paramètre deSerial vaut NULL alors quoi est une chaîne de caractères
  *	\result		paramètre quoi modifié avec le requête/réponse reçue
- *				paramètre sockEch modifié pour le mode DGRAM
  */
 void recevoir(socket_t *sockEch, generic quoi, pFct deSerial);
+
+/**
+ *	\fn			void str2Player(buffer_t buffer, generic quoi)
+ *	\brief		Dé-sérialisation d'une chaîne de caractères en structure player_t
+ *	\param 		buffer : chaîne de caractères à dé-sérialiser
+ *	\param 		quoi : structure player_t à remplir
+ */
+void str2Player(buffer_t buffer, generic quoi);
+
+/**
+ *	\fn			void player2Str(buffer_t buffer, generic quoi)
+ *	\brief		Serialisation d'une structure player_t en chaîne de caractères
+ *	\param 		buffer : chaîne de caractères résultante de la sérialisation
+ *	\param 		quoi : structure player_t à sérialiser
+ */
+void player2Str(buffer_t buffer, generic quoi);
 
 #endif /* DATA_H */
