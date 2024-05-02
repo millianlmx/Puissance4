@@ -1,6 +1,15 @@
 {
     "files.associations": {
-        "data.h": "c"
+        ".fantomasignore": "ignore",
+        "data.h": "c",
+        "logic.h": "c",
+        "ihm.h": "c",
+        "bitset": "c",
+        "memory": "c",
+        "random": "c",
+        "optional": "c",
+        "algorithm": "c",
+        "locale": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

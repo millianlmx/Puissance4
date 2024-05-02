@@ -33,7 +33,7 @@ bool verifVictoire(int **matrix, int lignes, int colonnes)
     return false;
 }
 
-int jouerJeton(int **matrix, int lignes, int column, int player)
+int jouerJeton(plateau_t matrix, int lignes, int column, int player)
 {
     for (int i = lignes - 1; i >= 0; i--)
     {
@@ -48,7 +48,7 @@ int jouerJeton(int **matrix, int lignes, int column, int player)
 
 plateau_t creerPlateau(int n, int m) 
 {
-    int **matrix = (int **)malloc(n * sizeof(int *));
+    plateau_t matrix = (plateau_t)malloc(n * sizeof(int *));
 
     for (int i = 0; i < n; i++)
     {

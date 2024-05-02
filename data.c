@@ -61,7 +61,7 @@ void str2Player(buffer_t buffer, generic quoi)
     char *port = strtok(NULL, "::");
     char *pseudo = strtok(NULL, "::");
 
-    player->ip = ip;
-    player->port = port;
-    player->pseudo = pseudo;
+    strcpy(player->ip, ip);
+    strcpy(player->port, port);
+    strcpy(player->pseudo, pseudo);
 }

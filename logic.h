@@ -55,19 +55,18 @@
  *	\param		ligne : le nombre de lignes de la matrice
  *  \return     boolean : True si victoire et false sinon.
  */
-bool verifVictoire(int **matrix, int ligne, int col);
+bool verifVictoire(plateau_t plateau, int ligne, int col);
 
 /**
  *	\fn			void afficherPlateau (int **matrix, int col, int ligne)
  *	\brief		Joue un jeton dans la colonne column
  *	\param		matrix : matrice d'entier comportant des 0, 1 ou 2
- *	\param		col : le nombre de colonnes de la matrice
  *	\param		ligne : le nombre de lignes de la matrice
  *  \param      column : l'entier de la colonne souhaitée
  *  \param      player : l'entier qui représente le joueur 1 ou 2.
  *	\return		int : 0 si l'insertion s'est bien déroulée, -1 sinon.
  */
-int jouerJeton(int **matrix, int ligne, int column, int player);
+int jouerJeton(plateau_t plateau, int ligne, int column, int player);
 
 /**
  *	\fn			int jouerPartie

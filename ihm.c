@@ -68,3 +68,8 @@ void afficherPlateau(int **matrix, int ligne, int col)
         printf("%s", separator);
     printf("#\n");
 }
+
+void effacerShell()
+{
+    printf("\033[H\033[J");
+}

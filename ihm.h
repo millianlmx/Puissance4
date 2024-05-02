@@ -50,4 +50,10 @@
  */
 void afficherPlateau(int **matrix, int col, int ligne);
 
+/**
+ *	\fn			void effacerShell ()
+ *	\brief		Effacele contenu du Shell
+ */
+void effacerShell();
+
 #endif /* IHM_H */
