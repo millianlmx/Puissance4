@@ -1,277 +1,233 @@
 #include <pthread.h>
 #include "logic.h"
 
+char colors[12][10] = {RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, BOLD_RED, BOLD_GREEN, BOLD_YELLOW, BOLD_BLUE, BOLD_MAGENTA, BOLD_CYAN};
+
 void reset(generic *quoi);
 int askForColumn(int col);
-int senregistrer(char *serverIP, int serverPort, char *listeningIP, char *listeningPort);
-int serveur(void* arg);
-int client(void* arg);
+void senregistrer(char *serverIP, int serverPort, char *color, socket_t *sockEch);
+int client(void *arg);
 
-int main() {
+int main()
+{
+    buffer_t buffer;
     char *serverIP = malloc(17 * sizeof(char));
     char *serverPort = malloc(7 * sizeof(char));
-    char *listeningIP = malloc(17 * sizeof(char));
-    char *listeningPort = malloc(7 * sizeof(char));
 
-    printf("Enter the registration server IP : ");
+    printf("Enter the game server IP : ");
     fgets(serverIP, 17, stdin);
-    printf("Enter the registration server port : ");
+    printf("Enter the game server port : ");
     fgets(serverPort, 7, stdin);
-    printf("Enter your ip address : ");
-    fgets(listeningIP, 17, stdin);
-    printf("Enter your port number : ");
-    fgets(listeningPort, 7, stdin);
 
     serverIP[strlen(serverIP) - 1] = '\0';
     serverPort[strlen(serverPort) - 1] = '\0';
-    listeningIP[strlen(listeningIP) - 1] = '\0';
-    listeningPort[strlen(listeningPort) - 1] = '\0';
 
-    if(senregistrer(serverIP, atoi(serverPort), listeningIP, listeningPort))
-    {
-        // launch a serveur thread and a client thread
-        pthread_t client, serveur;
+    char *color = malloc(12 * sizeof(char));
+    socket_t *sockEch = malloc(sizeof(socket_t));
 
-        player_t *listening = malloc(sizeof(player_t));
-        memset(listening, 0, sizeof(listening));
-        listening->ip = listeningIP;
-        listening->port = listeningPort;
-        pthread_create(&serveur, NULL, serveur, listening);
+    senregistrer(serverIP, atoi(serverPort), color, sockEch);
 
-        player_t *server = malloc(sizeof(player_t));
-        memset(server, 0, sizeof(server));
-        server->ip = serverIP;
-        server->port = serverPort;
-        pthread_create(&client, NULL, client, server);
+    char *pseudo = malloc(200 * sizeof(char));
+    printf("Enter your pseudo : ");
+    fgets(pseudo, 200, stdin);
+    pseudo[strlen(pseudo) - 1] = '\0';
 
-        pthread_join(serveur, NULL);
-        pthread_join(client, NULL);
-    }
-    else
-    {
-        printf("Registration failed !\n");
-    }
-
-    return 0;
-}
-
-int serveur(void* arg)
-{
-    player_t *temp = (player_t *)arg;
-    char *listeningIP = temp->ip;
-    char *listeningPort = temp->port;
-
-    socket_t socket = creerSocketEcoute(listeningIP, atoi(listeningPort));
-    socket_t client = accepterClt(socket);
-    buffer_t buffer;
+    // Sending pseudo
     memset(buffer, 0, sizeof(buffer_t));
+    strcpy(buffer, pseudo);
+    envoyer(sockEch, pseudo, NULL);
 
-    plateau_t plateau;
+    // Receiving the game infos
+    memset(buffer, 0, sizeof(buffer_t));
+    recevoir(sockEch, buffer, NULL);
 
-    recevoir(&client, buffer, NULL);
+    printf("Receiving game infos...\n");
 
-    char *keyword = strtok(buffer, "::");
-    int line = atoi(strtok(NULL, "::"));
+    int line = atoi(strtok(buffer, "::"));
     int col = atoi(strtok(NULL, "::"));
+    char *tmp = strtok(NULL, "::");
+    tmp[1] = '\0';
+    int nbPlayers = atoi(tmp);
 
-    if (strcmp(keyword, "INIT") == 0)
-    {
-        printf("Starting game !\n");
-        printf("Lines : %d\n", line);
-        printf("Columns : %d\n", col);
-
-        printf("Creating the board...\n");
-        effacerShell();
-        plateau = creerPlateau(line, col);
-        afficherPlateau(plateau, line, col);
-
-        memset(buffer, 0, sizeof(buffer_t));
-        strcpy(buffer, "INITIALIZED");
-        envoyer(&client, buffer, NULL);
-
-        while (1)
-        {
-            memset(buffer, 0, sizeof(buffer_t));
-            recevoir(&client, buffer, NULL);
-            printf("Wait for the RED turn ...\n", buffer);
-            keyword = strtok(buffer, "::");
-            if(strcmp(keyword, "PLAY") == 0)
-            {
-                char *selectedCol = strtok(NULL, "::");
-                jouerJeton(plateau, line, atoi(selectedCol), REDPLAYER);
-                effacerShell();
-                afficherPlateau(plateau, line, col);
-                memset(buffer, 0, sizeof(buffer_t));
-
-                if(verifVictoire(plateau, line, col))
-                {
-                    strcpy(buffer, "VICTORY::RED");
-                    envoyer(&client, buffer, NULL);
-                    break;
-                }
-
-                *selectedCol = '0' + askForColmun(col);
-                jouerJeton(plateau, line, atoi(selectedCol), YELLOWPLAYER);
-                effacerShell();
-                afficherPlateau(plateau, line, col);
-                sprintf(buffer, "PLAY::%s", selectedCol);
-                envoyer(&client, buffer, NULL);
-                memset(buffer, 0, sizeof(buffer_t));
-
-                if(verifVictoire(plateau, line, col))
-                {
-                    strcpy(buffer, "VICTORY::YELLOW");
-                    envoyer(&client, buffer, NULL);
-                    break;
-                }
-
-            }
-
-        }
-
-        keyword = strtok(buffer, "::");
-        char *player = strtok(NULL, "::");
-        if(strcmp(player, "RED") == 0)
-        {
-            printf("Red player won !\n");
-        }
-        else
-        {
-            printf("Yellow player won !\n");
-        }
-
-        close(client.fd);
-        close(socket.fd);
-        effacerShell();
-        return 0;
-    }
-    else
-    {
-        printf("INIT not received\n");
-        memset(buffer, 0, sizeof(buffer_t));
-        strcpy(buffer, "ERROR");
-        effacerShell();
-        return 1;
-    }
-}
-
-int client(void* arg)
-{
-    player_t *temp = (player_t*)arg;
-    char *serverIP = temp->ip; 
-    char *serverPort = temp->port;
-    
-    socket_t sockEch = connecterClt2Srv(serverIP, serverPort);
-    buffer_t buffer;
+    printf("Game infos received !\n");
+    printf("Line : %d\n", line);
+    printf("Column : %d\n", col);
+    printf("Nb players : %d\n", nbPlayers);
     memset(buffer, 0, sizeof(buffer_t));
 
-    char *line = malloc(3 * sizeof(char));
-    reset(line);
-    char *col = malloc(3 * sizeof(char));
-    reset(col);
+    plateau_t plateau = creerPlateau(line, col);
+    printf("Plateau created !\n");
 
-    printf("Enter the number of lines : ");
-    fgets(line, 3, stdin);
-    printf("Enter the number of columns : ");
-    fgets(col, 3, stdin);
-    line[strlen(line) - 1] = '\0';
-    col[strlen(col) - 1] = '\0';
+    int i = 0;
+    maillon_t *playerList = NULL;
 
-    int lineNumber = atoi(line);
-    int colNumber = atoi(col);
-
-    sprintf(buffer, "INIT::%d::%d", lineNumber, colNumber);
-
-    envoyer(&sockEch, buffer, NULL);
+    // receiving the player data in the following format : id::colorIndex::pseudo
     memset(buffer, 0, sizeof(buffer_t));
+    recevoir(sockEch, buffer, NULL);
 
-    recevoir(&sockEch, buffer, NULL); // INITIALIZED
-    effacerShell();
-    printf("Game initialized !\n");
-
-    plateau_t plateau = creerPlateau(lineNumber, colNumber);
-    afficherPlateau(plateau, lineNumber, colNumber);
-    
-    while (1)
+    while (i < nbPlayers)
     {
-        int selectedCol = askForColmun(colNumber);
-        jouerJeton(plateau, lineNumber, selectedCol, REDPLAYER);
+        printf("Storing player %d infos...\n", i + 1);
+        maillon_t *temp = malloc(sizeof(maillon_t));
+        memset(temp, 0, sizeof(player_t));
 
-        effacerShell();
-        afficherPlateau(plateau, lineNumber, colNumber);
-        printf("Waiting for the yellow turn...\n");
+        char *pseudo = malloc(200 * sizeof(char));
+        char *color = malloc(11 * sizeof(char));
+        memset(pseudo, 0, 200 * sizeof(char));
+        memset(color, 0, 11 * sizeof(char));
 
-        sprintf(buffer, "PLAY::%d", selectedCol);
-        envoyer(&sockEch, buffer, NULL);
+        // Creation of the player and adding it to the player list
+        if(i == 0) temp->id = atoi(strtok(&buffer[2], "::"));
+        else temp->id = atoi(strtok(NULL, "::"));
+        temp->colorIndex = atoi(strtok(NULL, "::"));
+        strcpy(color, colors[temp->colorIndex]);
+        temp->color = color;
+        strcpy(pseudo, strtok(NULL, "::"));
+        temp->pseudo = pseudo;
+        temp->suivant = playerList;
 
+        printf("Player details : %d::%d::%s\n", temp->id, temp->colorIndex, temp->pseudo);
+        
+        playerList = temp;
+
+        i++;
+    }
+
+    afficherPlateau(plateau, line, col, colors);
+
+    while (true)
+    {
         memset(buffer, 0, sizeof(buffer_t));
-        recevoir(&sockEch, buffer, NULL);
+        recevoir(sockEch, buffer, NULL);
 
         char *keyword = strtok(buffer, "::");
-
-        if(strcmp(keyword, "VICTORY") == 0)
+        if(strcmp(keyword, "YOURTURN") == 0)
         {
-            char *player = strtok(NULL, "::");
-            if(strcmp(player, "RED") == 0)
+            int selectedCol = askForColmun(col);
+            memset(buffer, 0, sizeof(buffer_t));
+            sprintf(buffer, "PLAYED::%d", selectedCol);
+            envoyer(sockEch, buffer, NULL);
+        }
+        else if(strcmp(keyword, "PLAY") == 0)
+        {
+            int playerId = atoi(strtok(NULL, "::"));
+            int selectedCol = atoi(strtok(NULL, "::"));
+            jouerJeton(plateau, line, selectedCol, playerId);
+            effacerShell();
+            afficherPlateau(plateau, line, col, colors);
+        }
+        else if(strcmp(keyword, "VICTORY") == 0)
+        {
+            int playerId = atoi(strtok(NULL, "::"));
+            maillon_t *temp = playerList;
+            while(temp != NULL)
             {
-                printf("Red player won !\n");
-            }
-            else
-            {
-                printf("Yellow player won !\n");
+                if(temp->id == playerId)
+                {
+                    printf("Player %s won !\n", temp->pseudo);
+                    break;
+                }
+                temp = temp->suivant;
             }
             break;
         }
-        else
-        {
-            selectedCol = atoi(strtok(NULL, "::"));
-            jouerJeton(plateau, lineNumber, selectedCol, YELLOWPLAYER);
-            effacerShell();
-            afficherPlateau(plateau, lineNumber, colNumber);
-            if(verifVictoire(plateau, lineNumber, colNumber))
-            {
-                printf("Yellow player won !\n");
-                break;
-            }
-        }
+        
     }
-    effacerShell();
+    return 0;
 }
 
-int senregistrer(char *serverIP, int serverPort, char *listeningIP, char *listeningPort)
+// int client(void *arg)
+// {
+//     player_t *temp = (player_t *)arg;
+//     char *serverIP = temp->ip;
+//     char *serverPort = temp->port;
+
+//     socket_t sockEch = connecterClt2Srv(serverIP, serverPort);
+//     buffer_t buffer;
+//     memset(buffer, 0, sizeof(buffer_t));
+
+//     char *line = malloc(3 * sizeof(char));
+//     reset(line);
+//     char *col = malloc(3 * sizeof(char));
+//     reset(col);
+
+//     printf("Enter the number of lines : ");
+//     fgets(line, 3, stdin);
+//     printf("Enter the number of columns : ");
+//     fgets(col, 3, stdin);
+//     line[strlen(line) - 1] = '\0';
+//     col[strlen(col) - 1] = '\0';
+
+//     int lineNumber = atoi(line);
+//     int colNumber = atoi(col);
+
+//     sprintf(buffer, "INIT::%d::%d", lineNumber, colNumber);
+
+//     envoyer(&sockEch, buffer, NULL);
+//     memset(buffer, 0, sizeof(buffer_t));
+
+//     recevoir(&sockEch, buffer, NULL); // INITIALIZED
+//     effacerShell();
+//     printf("Game initialized !\n");
+
+//     plateau_t plateau = creerPlateau(lineNumber, colNumber);
+//     afficherPlateau(plateau, lineNumber, colNumber);
+
+//     while (1)
+//     {
+//         int selectedCol = askForColmun(colNumber);
+//         jouerJeton(plateau, lineNumber, selectedCol, REDPLAYER);
+
+//         effacerShell();
+//         afficherPlateau(plateau, lineNumber, colNumber);
+//         printf("Waiting for the yellow turn...\n");
+
+//         sprintf(buffer, "PLAY::%d", selectedCol);
+//         envoyer(&sockEch, buffer, NULL);
+
+//         memset(buffer, 0, sizeof(buffer_t));
+//         recevoir(&sockEch, buffer, NULL);
+
+//         char *keyword = strtok(buffer, "::");
+
+//         if (strcmp(keyword, "VICTORY") == 0)
+//         {
+//             char *player = strtok(NULL, "::");
+//             if (strcmp(player, "RED") == 0)
+//             {
+//                 printf("Red player won !\n");
+//             }
+//             else
+//             {
+//                 printf("Yellow player won !\n");
+//             }
+//             break;
+//         }
+//         else
+//         {
+//             selectedCol = atoi(strtok(NULL, "::"));
+//             jouerJeton(plateau, lineNumber, selectedCol, YELLOWPLAYER);
+//             effacerShell();
+//             afficherPlateau(plateau, lineNumber, colNumber);
+//             if (verifVictoire(plateau, lineNumber, colNumber))
+//             {
+//                 printf("Yellow player won !\n");
+//                 break;
+//             }
+//         }
+//     }
+//     effacerShell();
+// }
+
+void senregistrer(char *serverIP, int serverPort, char *color, socket_t *sockEch)
 {
     printf("Connecting to the server...\n");
-    printf("Server IP : %s\n", serverIP);
-    printf("Server Port : %d\n", serverPort);
-    socket_t sockEch = connecterClt2Srv(serverIP, serverPort);
+    socket_t temp = connecterClt2Srv(serverIP, serverPort);
 
-    char *pseudo = malloc(201 * sizeof(char));
-
-    printf("Enter your pseudo : ");
-    fgets(pseudo, 201, stdin);
-
-    listeningIP[strlen(listeningIP) - 1] = '\0';
-    listeningPort[strlen(listeningPort) - 1] = '\0';
-    pseudo[strlen(pseudo) - 1] = '\0';
-
-    player_t *player = (player_t *)malloc(sizeof(player_t));
-    memset(player, 0, sizeof(player));
-    player->ip = listeningIP;
-    player->port = listeningPort;
-    player->pseudo = pseudo;
-
-    buffer_t buffer;
-    memset(buffer, 0, sizeof(buffer_t));
-    player2Str(buffer, player);
-
-    envoyer(&sockEch, buffer, NULL);
-    memset(buffer, 0, sizeof(buffer_t));
-
-    recevoir(&sockEch, buffer, NULL);
-    return strcmp(buffer, "REGISTERED") == 0;
+    memcpy(sockEch, &temp, sizeof(socket_t));
 }
 
-void reset(generic *quoi) 
+void reset(generic *quoi)
 {
     memset(quoi, 0, sizeof(generic));
 }

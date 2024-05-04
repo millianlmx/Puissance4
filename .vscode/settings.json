@@ -9,7 +9,11 @@
         "random": "c",
         "optional": "c",
         "algorithm": "c",
-        "locale": "c"
+        "locale": "c",
+        "unistd.h": "c",
+        "pthread.h": "c",
+        "iterator": "c",
+        "__locale": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

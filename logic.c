@@ -1,8 +1,8 @@
 #include "logic.h"
 
-bool verifVictoire(int **matrix, int lignes, int colonnes)
+bool verifVictoire(int **matrix, int lignes, int colonnes, int nbPlayer)
 {
-    for (int l = REDPLAYER; l <= YELLOWPLAYER; l++)
+    for (int l = 1; l <= nbPlayer; l++)
     {
         for (int i = 0; i < lignes; i++)
         {
@@ -66,61 +66,61 @@ plateau_t creerPlateau(int n, int m)
     return matrix;
 }
 
-void jouerPartie()
-{
+// void jouerPartie()
+// {
 
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+//     struct winsize w;
+//     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-    int raw_lines = w.ws_row;
-    int raw_columns = w.ws_col;
-    int p4_lines, p4_columns;
+//     int raw_lines = w.ws_row;
+//     int raw_columns = w.ws_col;
+//     int p4_lines, p4_columns;
 
-    if (raw_lines % 7 > 0 || raw_columns % 10 > 0)
-    {
-        p4_lines = raw_lines / 7;
-        p4_columns = raw_columns / 10;
-    }
-    else
-    {
-        p4_lines = raw_lines / 7 - 1;
-        p4_columns = raw_columns / 10 - 1;
-    }
+//     if (raw_lines % 7 > 0 || raw_columns % 10 > 0)
+//     {
+//         p4_lines = raw_lines / 7;
+//         p4_columns = raw_columns / 10;
+//     }
+//     else
+//     {
+//         p4_lines = raw_lines / 7 - 1;
+//         p4_columns = raw_columns / 10 - 1;
+//     }
 
-    int n, m;
+//     int n, m;
 
-    printf("Entrez la taille du plateau (ligne colonne) max (%d %d): ", p4_lines, p4_columns);
-    scanf("%d %d", &n, &m);
+//     printf("Entrez la taille du plateau (ligne colonne) max (%d %d): ", p4_lines, p4_columns);
+//     scanf("%d %d", &n, &m);
 
-    if (n > p4_lines || m > p4_columns)
-    {
-        n = p4_lines;
-        m = p4_columns;
-    }
+//     if (n > p4_lines || m > p4_columns)
+//     {
+//         n = p4_lines;
+//         m = p4_columns;
+//     }
 
-    plateau_t plateau = creerPlateau(n, m);
+//     plateau_t plateau = creerPlateau(n, m);
 
-    int player = REDPLAYER;
+//     int player = REDPLAYER;
 
-    while (verifVictoire(plateau, n, m) == false)
-    {
-        printf("\033[H\033[J");
-        afficherPlateau(plateau, n, m);
-        printf("Joueur %d, entrez la colonne ou vous voulez jouer: ", player);
-        int column;
-        scanf("%d", &column);
-        if (jouerJeton(plateau, n, column - 1, player) == -1)
-        {
-            printf("Colonne pleine, veuillez en choisir une autre\n");
-            continue;
-        }
-        else
-        {
-            player = player == REDPLAYER ? YELLOWPLAYER : REDPLAYER;
-        }
-    }
+//     while (verifVictoire(plateau, n, m) == false)
+//     {
+//         printf("\033[H\033[J");
+//         afficherPlateau(plateau, n, m);
+//         printf("Joueur %d, entrez la colonne ou vous voulez jouer: ", player);
+//         int column;
+//         scanf("%d", &column);
+//         if (jouerJeton(plateau, n, column - 1, player) == -1)
+//         {
+//             printf("Colonne pleine, veuillez en choisir une autre\n");
+//             continue;
+//         }
+//         else
+//         {
+//             player = player == REDPLAYER ? YELLOWPLAYER : REDPLAYER;
+//         }
+//     }
 
-    afficherPlateau(plateau, n, m);
-    printf("Joueur %d a gagne\n", player == REDPLAYER ? YELLOWPLAYER : REDPLAYER);
+//     afficherPlateau(plateau, n, m);
+//     printf("Joueur %d a gagne\n", player == REDPLAYER ? YELLOWPLAYER : REDPLAYER);
 
-}
+// }

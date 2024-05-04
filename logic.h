@@ -53,9 +53,10 @@
  *	\param		matrix : matrice d'entier comportant des 0, 1 ou 2
  *	\param		col : le nombre de colonnes de la matrice
  *	\param		ligne : le nombre de lignes de la matrice
+ *	\param		nbPlayer : le nombre de joueur dans la partie en cours
  *  \return     boolean : True si victoire et false sinon.
  */
-bool verifVictoire(plateau_t plateau, int ligne, int col);
+bool verifVictoire(plateau_t plateau, int ligne, int col, int nbPlayer);
 
 /**
  *	\fn			void afficherPlateau (int **matrix, int col, int ligne)

@@ -53,7 +53,11 @@ typedef struct
  */
 typedef struct
 {
-    player_t *player;
+    socket_t *socket;
+    int id;
+    int colorIndex;
+    char *pseudo;
+    char *color;
     struct maillon_t *suivant;
 } maillon_t;
 /**

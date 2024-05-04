@@ -1,7 +1,7 @@
 #include "ihm.h"
 #include "colors.h"
 
-void afficherPlateau(int **matrix, int ligne, int col)
+void afficherPlateau(int **matrix, int ligne, int col, char colors[12][10])
 {
     char separator[] = "##########";
 
@@ -51,7 +51,7 @@ void afficherPlateau(int **matrix, int ligne, int col)
                     printf("%s", separator);
                 else
                 {
-                    const char *color = matrix[i][j] == 1 ? RED : YELLOW;
+                    const char *color =  colors[matrix[i][j]];
                     printf("%s%s%s%s%s", j == 0 ? baseDelimiter[l - 1] : delimiter[l - 1], color, matrix[i][j] != 0 ? figure[l - 1] : emptyFigure[l - 1], WHITE, j == col - 1 ? baseDelimiter[l - 1] : "");
                 }
 

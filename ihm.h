@@ -48,7 +48,7 @@
  *	\param		ligne : le nombre de lignes de la matrice
  *	\note		Ne pas donner une matrice trop grande sous peine de dégrader l'expérience utilisateur
  */
-void afficherPlateau(int **matrix, int col, int ligne);
+void afficherPlateau(plateau_t matrix, int col, int ligne, char colors[12][10]);
 
 /**
  *	\fn			void effacerShell ()
