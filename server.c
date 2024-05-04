@@ -62,31 +62,34 @@ void* thread_function(void* arg) {
                 listExplorator = listExplorator->suivant;
             }
 
+            sleep(1);
+
             if(verifVictoire(plateau, line, col, nbPlayer))
             {
+                printf("Player %s won !\n", pseudo);
+
                 // Envoyer la victoire à tous les joueurs
                 listExplorator = playerList;
                 while (listExplorator != NULL)
                 {
+                    printf("Sending victory to %s !\n", listExplorator->pseudo);
                     memset(buffer, 0, sizeof(buffer_t));
                     sprintf(buffer, "VICTORY::%d", id);
                     envoyer(listExplorator->socket, buffer, NULL);
+                    printf("Victory sent to %s !\n", listExplorator->pseudo);
                     listExplorator = listExplorator->suivant;
                 }
 
                 break;
             }
-            printf("ID : %d\n", id + 1);
-            printf("nbPlayer : %d\n", nbPlayer + 1);
             tour = (id + 1) % (nbPlayer + 1); // Changer le tour pour l'autre joueur
             if (tour == 0) tour = 1;
-            printf("Tour : %d\n", tour);
         }
 
         // Déverrouillage du mutex
         pthread_mutex_unlock(&mutex);
 
-        // // Pause pour laisser le temps aux autres joueur de s'exécuter
+        // Pause pour laisser le temps aux autres joueur de s'exécuter
         sleep(2);
     }
     return NULL;
