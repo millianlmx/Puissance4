@@ -14,7 +14,8 @@
  *	\noop		I N C L U D E S   S P E C I F I Q U E S
  */
 #include <stdio.h>
-#include "data.h"
+#include <stdlib.h>
+#include "session.h"
 
 /*
 *****************************************************************************************
@@ -35,18 +36,7 @@
 *****************************************************************************************
  *	\noop		S T R C T U R E S   DE   D O N N E E S
  */
-/**
- *	\struct		socket
- *	\brief		Définition de la structure de données socket
- *	\note		Ce type est composé du fd de la socket, du mode (connecté/non)
- *				et des adresses applicatives (locale/distante)
- */
-struct requete_t {
-	int fd;							/**< numéro de la socket créée			*/
-	int mode;						/**< mode connecté/non : STREAM/DGRAM	*/
-	struct sockaddr_in addrLoc;		/**< adresse locale de la socket 		*/
-	struct sockaddr_in addrDst;		/**< adresse distante de la socket 		*/
-};
+
 /*
 *****************************************************************************************
  *	\noop		P R O T O T Y P E S   DES   F O N C T I O N S
@@ -59,6 +49,12 @@ struct requete_t {
  *	\param		ligne : le nombre de lignes de la matrice
  *	\note		Ne pas donner une matrice trop grande sous peine de dégrader l'expérience utilisateur
  */
-void afficherPlateau(int **matrix, int col, int ligne);
+void afficherPlateau(plateau_t matrix, int col, int ligne, char colors[12][10]);
+
+/**
+ *	\fn			void effacerShell ()
+ *	\brief		Effacele contenu du Shell
+ */
+void effacerShell();
 
 #endif /* IHM_H */

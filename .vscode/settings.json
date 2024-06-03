@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "msg.h": "c",
+        "ipc.h": "c",
+        "session.h": "c",
+        "logic.h": "c",
+        "ihm.h": "c",
+        "data.h": "c",
+        "stdio.h": "c",
+        "stdlib.h": "c",
+        "colors.h": "c",
+        "ioctl.h": "c",
+        "stdbool.h": "c",
+        "pthread.h": "c",
+        "string.h": "c",
+        "signal.h": "c"
+    }
+}
