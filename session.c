@@ -126,3 +126,22 @@ int connecterClt2Srv (key_t publicKey)
         return -1;
     }
 }
+
+void fermerLesBAL(maillon_t *playerList)
+{
+    maillon_t *listExplorator = playerList;
+    while (listExplorator != NULL)
+    {
+        key_t playerKey;
+        char filename[8] = "client"; 
+        word2Key(listExplorator->player.clientPID, &playerKey, filename);
+
+        msgctl(msgget(playerKey, 0666 | IPC_CREAT), IPC_RMID, NULL);
+        listExplorator = listExplorator->suivant;
+    }
+
+    key_t publicKey;
+    char filename[8] = "serveur"; 
+    word2Key(5000, &publicKey, filename);
+    msgctl(msgget(publicKey, 0666 | IPC_CREAT), IPC_RMID, NULL);
+}

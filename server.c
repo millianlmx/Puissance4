@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <pthread.h>
 #include "logic.h"
 
@@ -30,7 +32,6 @@ char colors[12][10] = {RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, BOLD_RED, BOLD_G
 void handleSignalServer(int signal)
 {
     if (signal == SIGINT) {
-        printf("Caught SIGINT signal\n");
         // send SIGUSR1 to all players
         maillon_t *listExplorator = playerList;
         while (listExplorator != NULL)
@@ -38,6 +39,7 @@ void handleSignalServer(int signal)
             kill(listExplorator->player.clientPID, SIGUSR1);
             listExplorator = listExplorator->suivant;
         }
+        fermerLesBAL(playerList);
         exit(0);
     }
     else if (signal == SIGUSR1) {
@@ -48,6 +50,7 @@ void handleSignalServer(int signal)
             kill(listExplorator->player.clientPID, SIGUSR1);
             listExplorator = listExplorator->suivant;
         }
+        fermerLesBAL(playerList);
         exit(0);
     }
 }
@@ -155,9 +158,6 @@ void* thread_function(void* arg) {
 
         // Déverrouillage du mutex
         pthread_mutex_unlock(&mutex);
-
-        // Pause pour laisser le temps aux autres joueur de s'exécuter
-        // sleep(1);
     }
     printf("Exiting player thread ...\n");
     return NULL;
@@ -264,5 +264,8 @@ int main(int argc, char *argv[])
     }
 
     free(threads);
+
+    // close all queues
+    fermerLesBAL(playerList);
     return 0;
 }

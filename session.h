@@ -75,4 +75,11 @@ maillon_t* accepterClt (key_t publicKey, maillon_t *playerList, char colorLabels
  */
 int connecterClt2Srv (int publicBal);
 
+/**
+ *	\fn			void fermerLesBAL(maillon_t *playerList)
+ *	\brief		Permet de fermer toutes les boites aux lettres des joueurs et du serveur.
+ *	\param		playerList : liste des joueurs 
+ */
+void fermerLesBAL(maillon_t *playerList);
+
 #endif /* SESSION_H */
