@@ -125,20 +125,4 @@ void envoyer(key_t key, char *data, int mode);
  */
 void recevoir(key_t key, char *data, int mode);
 
-/**
- *	\fn			void str2Player(buffer_t buffer, generic quoi)
- *	\brief		Dé-sérialisation d'une chaîne de caractères en structure player_t
- *	\param 		buffer : chaîne de caractères à dé-sérialiser
- *	\param 		quoi : structure player_t à remplir
- */
-void str2Player(buffer_t buffer, generic quoi);
-
-/**
- *	\fn			void player2Str(buffer_t buffer, generic quoi)
- *	\brief		Serialisation d'une structure player_t en chaîne de caractères
- *	\param 		buffer : chaîne de caractères résultante de la sérialisation
- *	\param 		quoi : structure player_t à sérialiser
- */
-void player2Str(buffer_t buffer, generic quoi);
-
 #endif /* DATA_H */

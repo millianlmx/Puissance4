@@ -5,8 +5,8 @@
 #define ASCLIENT 2
 
 char publicKeyWord[20] = "puissance4";
-char colorLabels[13][12] = {"", "RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "BOLD_RED", "BOLD_GREEN", "BOLD_YELLOW", "BOLD_BLUE", "BOLD_MAGENTA", "BOLD_CYAN"};
-char colors[13][10] = {"", RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, BOLD_RED, BOLD_GREEN, BOLD_YELLOW, BOLD_BLUE, BOLD_MAGENTA, BOLD_CYAN};
+char colorLabels[12][12] = {"RED", "GREEN", "YELLOW", "BLUE", "MAGENTA", "CYAN", "BOLD_RED", "BOLD_GREEN", "BOLD_YELLOW", "BOLD_BLUE", "BOLD_MAGENTA", "BOLD_CYAN"};
+char colors[12][10] = {RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, BOLD_RED, BOLD_GREEN, BOLD_YELLOW, BOLD_BLUE, BOLD_MAGENTA, BOLD_CYAN};
 
 void reset(generic *quoi);
 int askForColumn(int col);

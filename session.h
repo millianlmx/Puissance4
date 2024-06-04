@@ -41,20 +41,12 @@
  */
 /**
  *	\fn			void word2Key (int pid, key_t *key, char *filepath) 
- *	\brief		Transformer une chaine de caractère en clé IPC
+ *	\brief		Création d'une clé IPC à partir d'un chemin d'accès à un ficher et d'un pid
  *	\param		word : chaine de caractère à transformer
  *	\param		key : clé IPC résultante
  *	\result		la clé IPC résultante de la transformation
  */
 void word2Key (int pid, key_t *key, char *filepath);
-
-/**
- *	\fn			void creerBAL (key_t *key, int *balId)
- *	\brief		Création d'une boite aux lettres
- *	\param		key : clé IPC
-  *	\param		balId : identifiant de la boite aux lettre
- */
-void creerBAL (key_t *key, int *balId);
 
 /**
  *	\fn			maillon_t* accepterClt (key_t publicKey, maillon_t *playerList, char colorLabels[12][12])
@@ -69,7 +61,6 @@ maillon_t* accepterClt (key_t publicKey, maillon_t *playerList, char colorLabels
 /**
  *	\fn			int connecterClt2Srv (int publicBal)
  *	\brief		Dialogue de communication avec le serveur sur la boite au lettre principale pour initier une communication sur une boite lettre privée pour s'enregistrer
- *				l'adressage est fourni en paramètre
  *	\param		bal : id de la boite au lettre commune
  *	\result		0 si enregistrement ok, -1 sinon.
  */

@@ -14,9 +14,6 @@
  *	\noop		I N C L U D E S   S P E C I F I Q U E S
  */
 #include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/ioctl.h>
 #include "ihm.h"
 

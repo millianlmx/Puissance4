@@ -31,12 +31,6 @@ void word2Key (int pid, key_t *key, char *filepath)
 }
 
 
-void creerBAL(key_t *key, int *balId)
-{
-    CHECK(*balId = msgget(*key, 0666 | IPC_CREAT), "Error queue creation !")
-}
-
-
 maillon_t* accepterClt (key_t publicKey, maillon_t *playerList, char colorLabels[12][12])
 {
     buffer_t buffer;
