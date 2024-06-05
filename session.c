@@ -15,7 +15,7 @@ pid_t serverPID;
 void handleSignal(int signal)
 {
     if (signal == SIGINT) {
-        printf("Caught SIGINT signal\n");
+        printf("Leaving the game...\n");
         // send SIGUSR1 to server
         kill(serverPID, SIGUSR1);
     }

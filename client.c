@@ -138,5 +138,7 @@ int askForColumn(int col)
     char temp[4];
     printf("Enter column number (1-%d): ", col);
     fgets(temp, 4, stdin);
-    return atoi(temp) - 1;
+    int res = atoi(temp) - 1;
+    while(res > col - 1) return askForColumn(col);
+    return res;
 }
