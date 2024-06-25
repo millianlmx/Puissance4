@@ -1,15 +1,89 @@
 #include <pthread.h>
 #include "logic.h"
+#include <stdio.h>
+#include <wiringPi.h>
+#include <wiringPiI2C.h>
+#include <mcp23008.h>
+#include <lcd.h>
+
+#define BUTTONLEFT_PIN 6
+#define BUTTONRIGHT_PIN 24
+#define BUTTONBOTTOM_PIN 23
+#define VIBRATOR_PIN 2
+
+#define    MAX_LCDS    8
+
+#define ADRESSELCD 0x21
+#define AF_BASE 100
+#define AF_STRB (AF_BASE+2)
+#define AF_RW (AF_BASE+14)
+#define AF_RS (AF_BASE+1)
+#define AF_DB4 (AF_BASE+3)
+#define AF_DB5 (AF_BASE+4)
+#define AF_DB6 (AF_BASE+5)
+#define AF_DB7 (AF_BASE+6)
+#define AF_BLUE (AF_BASE+12)
+
+#define AF_RED (107)
+
+#define AF_BACKLIGHT_PIN (AF_BASE+15)
+#define AF_BACKLIGHTGRD_PIN (AF_BASE+16)
+
+#define SDA 3
+#define SCL 5
+#define ADRESSELCD 0x21
+#define MAX_CAR 1000
 
 char colors[12][10] = {RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, BOLD_RED, BOLD_GREEN, BOLD_YELLOW, BOLD_BLUE, BOLD_MAGENTA, BOLD_CYAN};
 
 void reset(generic *quoi);
-int askForColumn(int col);
+int askForColmun(plateau_t plateau, int line, int col, char colors[10]);
 void senregistrer(char *serverIP, int serverPort, char *color, socket_t *sockEch);
 int client(void *arg);
 
+int initLcd(){
+    int lcdHandle, i;
+    int fd = wiringPiI2CSetup(ADRESSELCD);
+
+    for(i=0;i<9;i++){
+        wiringPiI2CWriteReg8(fd,i,0xFF);
+    }
+    wiringPiSetupSys();
+    mcp23008Setup(AF_BASE,ADRESSELCD);
+    pinMode(AF_BLUE,OUTPUT);
+    lcdHandle = lcdInit(2, 17, 4, AF_RS, AF_STRB, AF_DB4,AF_DB5,AF_DB6,AF_DB7, 0,0,0,0);
+    if(lcdHandle < 0){
+        printf("lcdInit failed\n");
+        return -1;
+    }
+    lcdDisplay(lcdHandle,1);
+    return lcdHandle;
+}
+
+void effacerLigneLcd(int lcdHandle, int ligne) {
+    lcdPosition(lcdHandle, 0, ligne); // Positionne le curseur au début de la ligne
+    lcdPuts(lcdHandle, "                "); // Écrit des espaces pour effacer la ligne (ajustez le nombre d'espaces en fonction de la largeur de votre écran)
+}
+
+void ecrireLcd(int lcdHandle, int ligne, int colonne, char* msg){
+    effacerLigneLcd(lcdHandle, ligne); // Efface la ligne spécifiée
+    lcdPosition(lcdHandle, colonne, ligne); // Positionne le curseur
+    lcdPuts(lcdHandle, msg); // Affiche le message
+}
+
 int main()
 {
+    CHECK(wiringPiSetup(), "Erreur lors de l'initialisation de WiringPi\n")
+    int lcdHandle;
+    lcdHandle = initLcd();
+    CHECK(lcdHandle < 0 ? -1 : 0, "Erreur lors de l'initialisation du LCD\n")
+
+    // Configuration des broches GPIO en entrée avec pull-up/down désactivé
+    pinMode(BUTTONLEFT_PIN, INPUT);
+    pinMode(BUTTONRIGHT_PIN, INPUT);
+    pinMode(BUTTONBOTTOM_PIN, INPUT);
+    pinMode(VIBRATOR_PIN, OUTPUT);
+
     buffer_t buffer;
     char *serverIP = malloc(17 * sizeof(char));
     char *serverPort = malloc(7 * sizeof(char));
@@ -103,7 +177,7 @@ int main()
         char *keyword = strtok(buffer, "::");
         if(strcmp(keyword, "YOURTURN") == 0)
         {
-            int selectedCol = askForColmun(col);
+            int selectedCol = askForColmun(plateau, line, col, colors);
             memset(buffer, 0, sizeof(buffer_t));
             sprintf(buffer, "PLAYED::%d", selectedCol);
             envoyer(sockEch, buffer, NULL);
@@ -111,7 +185,24 @@ int main()
         else if(strcmp(keyword, "PLAY") == 0)
         {
             int playerId = atoi(strtok(NULL, "::"));
+            char *pseudo;
+            maillon_t *temp = playerList;
+            while(temp != NULL)
+            {
+                if(temp->id == playerId)
+                {
+                    pseudo = temp->pseudo;
+                    break;
+                }
+                temp = temp->suivant;
+            }
             int selectedCol = atoi(strtok(NULL, "::"));
+
+            effacerLigneLcd(lcdHandle, 0);
+            char msg[16];
+            sprintf(msg, "%s joue !", pseudo);
+            ecrireLcd(lcdHandle, 0, 0, msg);
+
             jouerJeton(plateau, line, selectedCol, playerId);
             effacerShell();
             afficherPlateau(plateau, line, col, colors);
@@ -124,7 +215,10 @@ int main()
             {
                 if(temp->id == playerId)
                 {
-                    printf("Player %s won !\n", temp->pseudo);
+                    effacerLigneLcd(lcdHandle, 0);
+                    char msg[16];
+                    sprintf(msg, "%s a gagne !", temp->pseudo);
+                    ecrireLcd(lcdHandle, 0, 0, msg);
                     break;
                 }
                 temp = temp->suivant;
@@ -134,89 +228,6 @@ int main()
     }
     return 0;
 }
-
-// int client(void *arg)
-// {
-//     player_t *temp = (player_t *)arg;
-//     char *serverIP = temp->ip;
-//     char *serverPort = temp->port;
-
-//     socket_t sockEch = connecterClt2Srv(serverIP, serverPort);
-//     buffer_t buffer;
-//     memset(buffer, 0, sizeof(buffer_t));
-
-//     char *line = malloc(3 * sizeof(char));
-//     reset(line);
-//     char *col = malloc(3 * sizeof(char));
-//     reset(col);
-
-//     printf("Enter the number of lines : ");
-//     fgets(line, 3, stdin);
-//     printf("Enter the number of columns : ");
-//     fgets(col, 3, stdin);
-//     line[strlen(line) - 1] = '\0';
-//     col[strlen(col) - 1] = '\0';
-
-//     int lineNumber = atoi(line);
-//     int colNumber = atoi(col);
-
-//     sprintf(buffer, "INIT::%d::%d", lineNumber, colNumber);
-
-//     envoyer(&sockEch, buffer, NULL);
-//     memset(buffer, 0, sizeof(buffer_t));
-
-//     recevoir(&sockEch, buffer, NULL); // INITIALIZED
-//     effacerShell();
-//     printf("Game initialized !\n");
-
-//     plateau_t plateau = creerPlateau(lineNumber, colNumber);
-//     afficherPlateau(plateau, lineNumber, colNumber);
-
-//     while (1)
-//     {
-//         int selectedCol = askForColmun(colNumber);
-//         jouerJeton(plateau, lineNumber, selectedCol, REDPLAYER);
-
-//         effacerShell();
-//         afficherPlateau(plateau, lineNumber, colNumber);
-//         printf("Waiting for the yellow turn...\n");
-
-//         sprintf(buffer, "PLAY::%d", selectedCol);
-//         envoyer(&sockEch, buffer, NULL);
-
-//         memset(buffer, 0, sizeof(buffer_t));
-//         recevoir(&sockEch, buffer, NULL);
-
-//         char *keyword = strtok(buffer, "::");
-
-//         if (strcmp(keyword, "VICTORY") == 0)
-//         {
-//             char *player = strtok(NULL, "::");
-//             if (strcmp(player, "RED") == 0)
-//             {
-//                 printf("Red player won !\n");
-//             }
-//             else
-//             {
-//                 printf("Yellow player won !\n");
-//             }
-//             break;
-//         }
-//         else
-//         {
-//             selectedCol = atoi(strtok(NULL, "::"));
-//             jouerJeton(plateau, lineNumber, selectedCol, YELLOWPLAYER);
-//             effacerShell();
-//             afficherPlateau(plateau, lineNumber, colNumber);
-//             if (verifVictoire(plateau, lineNumber, colNumber))
-//             {
-//                 printf("Yellow player won !\n");
-//                 break;
-//             }
-//         }
-//     }
-//     effacerShell();
-// }
 
 void senregistrer(char *serverIP, int serverPort, char *color, socket_t *sockEch)
 {
@@ -231,10 +242,48 @@ void reset(generic *quoi)
     memset(quoi, 0, sizeof(generic));
 }
 
-int askForColmun(int col)
+int askForColmun(plateau_t plateau, int line, int col, char colors[10])
 {
-    char temp[4];
-    printf("Enter column number (1-%d): ", col);
-    fgets(temp, 4, stdin);
-    return atoi(temp) - 1;
+
+    int column = 1;
+
+    while (1) {
+        effacerShell();
+        // Lecture de l'état des boutons
+        int buttonLeftState = digitalRead(BUTTONLEFT_PIN);
+        int buttonRightState = digitalRead(BUTTONRIGHT_PIN);
+        int buttonBottomState = digitalRead(BUTTONBOTTOM_PIN);
+
+        if (!buttonBottomState) { // Le boutton bas est appuyé
+            digitalWrite(VIBRATOR_PIN, 1);
+            usleep(100000);
+            digitalWrite(VIBRATOR_PIN, 0);
+            break;
+        }
+
+	    if (!buttonLeftState && column > 1) {
+            column -= 1; // Le boutton gauche est appuyé
+            digitalWrite(VIBRATOR_PIN, 1);
+            usleep(100000);
+            digitalWrite(VIBRATOR_PIN, 0);
+        }
+
+	    if (!buttonRightState && column < col) {
+            column += 1; // Le boutton droite est appuyé
+            digitalWrite(VIBRATOR_PIN, 1);
+            usleep(100000);
+            digitalWrite(VIBRATOR_PIN, 0);
+        }
+
+        // Affichage du plateau
+        afficherPlateau(plateau, line, col, colors);
+
+        // Affichage de la colonne
+	    printf("Colonne : %d (Appuyez sur le boutons bas pour confirmer)\n", column);
+
+        // Attente de 100 ms avant la prochaine lecture
+        delay(300);
+    }
+
+    return column - 1;
 }
